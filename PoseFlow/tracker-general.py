@@ -19,6 +19,8 @@ import copy
 import heapq
 from munkres import Munkres, print_matrix
 from PIL import Image
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from utils import *
@@ -35,7 +37,7 @@ def display_pose(imgdir, visdir, tracked, cmap):
         img = Image.open(os.path.join(imgdir,imgname))
         width, height = img.size
         fig = plt.figure(figsize=(width/10,height/10),dpi=10)
-        plt.imshow(img)
+        #plt.imshow(img)
         for pid in range(len(tracked[imgname])):
             pose = np.array(tracked[imgname][pid]['keypoints']).reshape(-1,3)[:,:3]
             tracked_id = tracked[imgname][pid]['idx']
@@ -73,7 +75,8 @@ def display_pose(imgdir, visdir, tracked, cmap):
         extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
         if not os.path.exists(visdir): 
             os.mkdir(visdir)
-        fig.savefig(os.path.join(visdir,imgname.split()[0]+".png"), pad_inches = 0.0, bbox_inches=extent, dpi=13)
+        #fig.savefig(os.path.join(visdir,imgname.split()[0]+".png"), pad_inches = 0.0, bbox_inches=extent, dpi=13)
+        fig.savefig(os.path.join(visdir,imgname.split()[0]), pad_inches = 0.0, bbox_inches=extent, dpi=13)
         plt.close()
 
 
@@ -235,7 +238,7 @@ if __name__ == '__main__':
             notrack[frame_name][pid]['idx'] = track[frame_name][pid+1]['new_pid']
 
     with open(tracked_json,'w') as json_file:
-        json_file.write(json.dumps(notrack))
+        json_file.write(json.dumps(notrack, sort_keys=True))
 
     if len(args.visdir)>0:
         cmap = plt.cm.get_cmap("hsv", num_persons)
