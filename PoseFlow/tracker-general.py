@@ -198,10 +198,15 @@ if __name__ == '__main__':
 
         max_pid_id = max(max_pid_id, track[frame_name]['num_boxes'])
         cor_file = os.path.join(image_dir, "".join([frame_id, '_', next_frame_id, '_orb.txt']))
-        all_cors = np.loadtxt(cor_file)
-
+        # PMB - skip errors caused by malformed images
+        try:
+            all_cors = np.loadtxt(cor_file)
+        except:
+            track[next_frame_name] = copy.deepcopy(track[frame_name])
+            continue
         # if there is no people in this frame, then copy the info from former frame
-        if track[next_frame_name]['num_boxes'] == 0:
+        # PMB
+        if 'num_boxes' not in track[next_frame_name] or track[next_frame_name]['num_boxes'] == 0:
             track[next_frame_name] = copy.deepcopy(track[frame_name])
             continue
         cur_all_pids, cur_all_pids_fff = stack_all_pids(track, frame_list[:-1], idx, max_pid_id, link_len)
@@ -235,7 +240,11 @@ if __name__ == '__main__':
     print("Export tracking results to json...\n")
     for fid, frame_name in enumerate(tqdm(frame_list)):
         for pid in range(track[frame_name]['num_boxes']):
-            notrack[frame_name][pid]['idx'] = track[frame_name][pid+1]['new_pid']
+            # PMB
+            try:
+                notrack[frame_name][pid]['idx'] = track[frame_name][pid+1]['new_pid']
+            except:
+                continue
 
     with open(tracked_json,'w') as json_file:
         json_file.write(json.dumps(notrack, sort_keys=True))

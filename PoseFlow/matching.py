@@ -31,15 +31,19 @@ def orb_matching(img1_path, img2_path, vidname, img1_id, img2_id):
     
     out_path = "%s/%s_%s_orb.txt"%(vidname, img1_id, img2_id)
     # print(out_path)
-    
-    #if isinstance(img1_path, str):
-    img1 = cv2.cvtColor(cv2.imread(img1_path), cv2.COLOR_BGR2RGB)
-    #else:
-    #    img1 = cv2.cvtColor(img1_path, cv2.COLOR_BGR2RGB)
-    #if isinstance(img2_path, str):
-    img2 = cv2.cvtColor(cv2.imread(img2_path), cv2.COLOR_BGR2RGB)
-    #else:
-    #    img2 = cv2.cvtColor(img2_path, cv2.COLOR_BGR2RGB)
+
+    # PMB This works as long as there aren't two adjacent image errors
+    try: 
+        img1 = cv2.cvtColor(cv2.imread(img1_path), cv2.COLOR_BGR2RGB)
+    except:
+        img2 = cv2.cvtColor(cv2.imread(img2_path), cv2.COLOR_BGR2RGB)
+        generate_fake_cor(img2, out_path)
+        return
+    try: 
+        img2 = cv2.cvtColor(cv2.imread(img2_path), cv2.COLOR_BGR2RGB)
+    except:
+        generate_fake_cor(img1, out_path)
+        return
     
     # Initiate ORB detector
     orb = cv2.ORB_create(nfeatures=10000, scoreType=cv2.ORB_FAST_SCORE)
